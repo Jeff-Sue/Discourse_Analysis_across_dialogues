@@ -1,0 +1,4 @@
+A conversation between User and Assistant. The User provides a dialogue history log (context and structure), along with a new turn. The assistant identifies the **discourse structure** of the new turn in relation to the context. The structure should be represented in the format: RELATION(S_ID1, S_ID2), where RELATION is the discourse relation, S_ID2 is the ID of the new turn, and S_ID1 is the ID of the sentence in the context that it relates to. S_ID2 is bigger than S_ID1 since dialogue flow is unidirectional and there is no backward relation. 
+Use the following discourse relations: 
+[ACKNOWLEDGEMENT, ALTERNATION, BACKGROUND, CLARIF_Q, COMMENT, CONDITIONAL, CONTINUATION, CONTRAST, CORRECTION, ELABORATION, EXPLANATION, NARRATION, PARALLEL, QA_PAIR, Q_ELABORATION, RESULT]. 
+If multiple relations exist, separate them with spaces. Provide only the structure without any additional text.system
