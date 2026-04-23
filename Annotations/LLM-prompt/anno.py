@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from api import parallel_inference
 
 
@@ -179,7 +180,7 @@ def process_dialogue_incremental(dialogue, system_prompt, user_template, max_ret
     return dialogue
 
 
-def process_dialogues_from_file(input_path, output_path, system_prompt, user_template):
+def process_dialogues_from_file(input_path, output_path, system_prompt, user_template, max_workers=4):
     """
     Process dialogues from input file and save to output file
     
@@ -188,6 +189,7 @@ def process_dialogues_from_file(input_path, output_path, system_prompt, user_tem
         output_path: Path to output JSONL file
         system_prompt: System prompt
         user_template: User template
+        max_workers: Maximum number of concurrent processes for dialogue processing
     """
     # Load dialogues
     dialogues = []
@@ -206,12 +208,28 @@ def process_dialogues_from_file(input_path, output_path, system_prompt, user_tem
     
     print(f"Loaded {len(dialogues)} dialogues from {input_path}")
     
-    # Process each dialogue with incremental discourse analysis
-    processed_dialogues = []
-    for idx, dialogue in enumerate(dialogues):
-        print(f"Processing dialogue {idx + 1}/{len(dialogues)}: {dialogue.get('id', 'unknown')}")
-        processed = process_dialogue_incremental(dialogue, system_prompt, user_template)
-        processed_dialogues.append(processed)
+    # Process dialogues concurrently
+    processed_dialogues = [None] * len(dialogues)
+    
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all dialogue processing tasks
+        future_to_idx = {
+            executor.submit(process_dialogue_incremental, dialogue, system_prompt, user_template): idx
+            for idx, dialogue in enumerate(dialogues)
+        }
+        
+        print(f"Processing {len(dialogues)} dialogues with {max_workers} concurrent processes...")
+        
+        # Collect results as they complete
+        for future in as_completed(future_to_idx):
+            idx = future_to_idx[future]
+            try:
+                processed_dialogues[idx] = future.result()
+                print(f"Completed dialogue {idx + 1}/{len(dialogues)}: {processed_dialogues[idx].get('id', 'unknown')}")
+            except Exception as e:
+                print(f"Failed to process dialogue {idx + 1}: {str(e)}")
+                # Keep original dialogue if processing failed
+                processed_dialogues[idx] = dialogues[idx]
     
     # Save results
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -239,6 +257,9 @@ def main():
     
     output_base_path = Path(__file__).parent / "processed_dialogues"
     
+    # Set number of concurrent processes for dialogue processing
+    max_workers = 4  # Adjust based on your CPU cores and API rate limits
+    
     for dataset_name, filename in datasets:
         input_path = base_data_path / dataset_name / filename
         output_path = output_base_path / f"{dataset_name}_with_discourse.jsonl"
@@ -247,7 +268,7 @@ def main():
             print(f"\n{'='*60}")
             print(f"Processing {dataset_name}")
             print(f"{'='*60}")
-            process_dialogues_from_file(input_path, str(output_path), system_prompt, user_template)
+            process_dialogues_from_file(input_path, str(output_path), system_prompt, user_template, max_workers)
         else:
             print(f"Input file not found: {input_path}")
 
