@@ -166,13 +166,28 @@ def process_dialogue_incremental(dialogue, system_prompt, user_template, max_ret
         )[0]
         
         if result["success"]:
-            discourse_results.append(result["parsed_response"])
+            discourse_results.append({
+                "prompt": {
+                    "system": system_prompt,
+                    "user": user_prompt
+                },
+                "response": result["parsed_response"]
+            })
         else:
-            discourse_results.append(None)
+            discourse_results.append({
+                "prompt": {
+                    "system": system_prompt,
+                    "user": user_prompt
+                },
+                "error": result["error"]
+            })
             print(f"Failed to process turn {new_turn_id} in dialogue {dialogue_id}: {result['error']}")
     
     # Add first turn as having no prior context (no structure)
-    discourse_results.insert(0, "")
+    discourse_results.insert(0, {
+        "prompt": {"system": "", "user": ""},
+        "response": ""
+    })
     
     # Add discourse results to dialogue
     dialogue["discourse_structure"] = discourse_results

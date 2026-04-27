@@ -1,0 +1,208 @@
+You are a discourse structure annotation assistant. Your task is to analyze a short dialogue using a structured relational framework based on Segmented Discourse Representation Theory (SDRT).
+
+The rhetorical structure of a dialogue should be represented as a directed acyclic graph (DAG), where nodes are utterances or minimal discourse units, and edges are rhetorical relations between them.
+
+You must carefully identify topics, premises, narrative sequencing, and rhetorical relations. Most importantly, you must construct a complete discourse graph over all utterances/premises, not merely annotate adjacent dialogue pairs.
+
+Input Dialogue:
+{dialogue}
+
+Annotation Requirements:
+
+1. Topic Identification
+- Identify the main topics or discourse elements in the dialogue.
+- Assign meaningful topic labels, such as:
+  - [topic-a]&#58; Initial context
+  - [topic-b]&#58; User’s problem
+  - [topic-c]&#58; Agent’s suggested action
+  - [topic-d]&#58; Follow-up clarification
+- Topic labels should be meaningful and should summarize the functional role of each topic.
+- Do not create unnecessary topics for every utterance if multiple utterances belong to the same topic.
+
+2. Premise Identification
+- Convert the dialogue into a sequence of premises P0, P1, ..., Pn.
+- Each premise should capture one essential event, action, question, answer, clarification, acknowledgment, or explanation.
+- Premises should preserve the key content of the dialogue.
+- Avoid overly general premises.
+- Avoid adding information not present in the dialogue.
+- Preserve the original surface order unless there is an explicit temporal marker requiring reordering.
+
+3. Narrative Sequencing Rules
+- Maintain chronological order unless the dialogue explicitly introduces a temporal shift.
+- If a premise introduces a temporal shift, attach it to the appropriate earlier premise using a suitable relation.
+- Use the following sequencing rules:
+  - "Then", "Next", "After that", "X later": attach the current premise to the immediately preceding temporally relevant premise using Narration.
+  - "X before": attach the current premise using Narration, but recognize that it refers to an earlier event.
+  - "While": use Elaboration when two related events occur in parallel or provide additional detail.
+  - "Finally": ensure this premise is treated as the final event in the narrative sequence.
+  - "First": ensure this premise is treated as the initial event in the narrative sequence.
+- If the surface order differs from the event order, explain the adjustment.
+
+4. Topic-Level Relationships
+- Identify logical and temporal relationships between topics.
+- Use the format:
+  [topic-x] --relation--> [topic-y]
+- Relations may include, but are not limited to:
+  - background-to-main-event
+  - question-answer
+  - cause-effect
+  - problem-solution
+  - clarification
+  - elaboration
+  - contrast
+  - continuation
+- Topic-level relationships are higher-level summaries and do not replace premise-level rhetorical relations.
+
+5. Premise-Level Rhetorical Graph Construction
+
+You must construct a complete SDRT-style discourse graph over all premise or utterance nodes.
+
+Node Definition:
+- Each utterance or minimal premise is a node.
+- Number nodes from 0 to N-1 according to their surface order in the dialogue.
+- Every node must appear in the final analysis.
+- Do not merge two turns into one node unless they express the same minimal discourse unit.
+
+Edge Definition:
+- Each rhetorical relation must be represented as:
+  [source_node_id, target_node_id, relation]
+- source_node_id is the earlier discourse unit that provides the discourse anchor.
+- target_node_id is the later discourse unit that attaches to it.
+- relation must be one of the 16 SDRT relation names listed above.
+- All edges must point from an earlier node to a later node.
+- The final structure must be a directed acyclic graph.
+
+Important Graph Construction Rules:
+- Do NOT only output adjacent relations such as [0,1], [2,3], [4,5].
+- Do NOT only output user-agent pairs.
+- For every node i where i > 0, consider all previous nodes 0 ... i-1 as possible antecedents.
+- The antecedent does not have to be the immediately previous node.
+- Long-distance relations are allowed and should be used when appropriate.
+- A node may have multiple incoming relations if it connects to multiple earlier discourse units.
+- Every non-root node should have at least one incoming rhetorical relation.
+- For a dialogue with N nodes, the graph should normally contain at least N-1 edges.
+- If fewer than N-1 edges are produced, explicitly explain which nodes are independent roots and why.
+
+Examples of long-distance relations:
+- A later answer may attach to an earlier question, not only to the immediately previous utterance.
+- A clarification question may attach to an earlier ambiguous statement.
+- An explanation may support a previous claim or action.
+- An elaboration may expand a topic introduced several turns earlier.
+- An acknowledgment may respond to the immediately previous utterance, while also continuing a broader topic.
+
+6. Relation Selection Guidelines
+
+Use only the following 16 SDRT relation names:
+
+- Comment:
+  A speaker’s attitude or evaluative remark about a preceding utterance or event.
+
+- Clarification_question:
+  A question aimed at resolving ambiguity or eliciting further detail about a prior utterance.
+
+- Elaboration:
+  An expansion that adds detail or development to the content of a previous unit.
+
+- Acknowledgment:
+  A brief response signaling that a previous utterance was received or understood.
+
+- Continuation:
+  A further discourse move that maintains the same topic or thread without adding new relation.
+
+- Explanation:
+  A relation where one unit provides a reason or cause for another.
+
+- Conditional:
+  A relation expressing that one proposition holds under the condition of another.
+
+- Question-answer_pair:
+  A pairing of a question with its direct answer, linking information request and response.
+
+- Alternation:
+  A turn-taking pattern where speakers alternate contributions on the same topic.
+
+- Q-Elab:
+  An elaboration that specifically follows a question to add detail relevant to it.
+
+- Result:
+  A relation where one unit reports the outcome or consequence of another.
+
+- Background:
+  Information providing context or setting for understanding another unit.
+
+- Narration:
+  A sequence of events or actions presented as they occur in time.
+
+- Correction:
+  A relation where one unit corrects or revises the content of a previous unit.
+
+- Parallel:
+  A relation linking two units that present analogous or comparing structures.
+
+- Contrast:
+  A relation that highlights differences or oppositions between two units.
+
+7. Output Format
+
+Your output must follow this structure exactly:
+
+Topics:
+- [topic-a]&#58; ...
+- [topic-b]&#58; ...
+- [topic-c]&#58; ...
+
+Topic-Level Relationships:
+- [topic-a] --relation--> [topic-b]: brief explanation
+- [topic-b] --relation--> [topic-c]: brief explanation
+
+Premises:
+- P0: ...
+- P1: ...
+- P2: ...
+- P3: ...
+
+Narrative Structure:
+- P0 is the initial premise because ...
+- P1 follows P0 because ...
+- P2 attaches to P0/P1 because ...
+- If temporal order differs from surface order, explain the adjustment.
+
+Premise Attachment Analysis:
+For each node after P0, analyze its attachment:
+- P1:
+  - Candidate antecedents considered: P0
+  - Selected antecedent(s): P0
+  - Relation: ...
+  - Reason: ...
+
+- P2:
+  - Candidate antecedents considered: P0, P1
+  - Selected antecedent(s): ...
+  - Relation: ...
+  - Reason: ...
+
+- P3:
+  - Candidate antecedents considered: P0, P1, P2
+  - Selected antecedent(s): ...
+  - Relation: ...
+  - Reason: ...
+
+Rhetorical Relationships:
+[
+  [0, 1, "RelationName"],
+  [1, 2, "RelationName"],
+  [0, 3, "RelationName"]
+]
+
+Graph Coverage Check:
+- Total number of nodes: N
+- Total number of rhetorical edges: M
+- Nodes covered by incoming edges: ...
+- Root node(s): ...
+- If any non-root node has no incoming edge, explain why.
+- Confirm that the graph is not restricted to adjacent pairs only.
+
+Exclusions:
+- Do not include final answers, numerical calculations, or external interpretations.
+- Do not infer unstated events.
+- Do not resolve the dialogue task beyond the discourse structure.
