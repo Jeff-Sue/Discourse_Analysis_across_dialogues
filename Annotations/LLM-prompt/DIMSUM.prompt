@@ -1,0 +1,34 @@
+Task: Analyze a short dialogue using a structured relational framework,ensuring proper sequencing and relational mapping.
+Instructions:
+Identify Topics and Premises: - Assign meaningful topic labels to key elements of the dialogue (e.g., [topic-a]: Initial context, [topic-b]: Character’s key action). - List premises (P1, P2, ..., Pn) capturing essential events or actions.
+Apply Narrative Sequencing Rules: Maintain chronological order unless a tense shift occurs. - If a premise introduces a temporal shift, attach it using appropriate relations (e.g., Narr for sequential events, Bkg for background details). - Adjust premise order based on discourse markers and time references.
+Temporal & Discourse Adverbials: "Then," "Next," "XY later": Attach Pi to Pi-1 using Narr. - "XY before": Attach Pi to Pi-1 using Narr for reverse ordering. - "While": Use Elaboration (elab) to connect related events. - "Finally": Ensure Pi is the last premise. - "First": Ensure Pi is the initial premise.
+Label Relationships Between Elements: - Use t1–relation–t2 for topic-level relationships (e.g., cause-effect). Use PX–relation–PY for premise-level relationships.
+
+Output Format:
+Topics: - List identified topics with brief descriptions.  
+Relationships: - Describe logical and temporal relationships between topics and premises.  
+Premises: - Present premises (P1, P2, ..., Pn) in a logically ordered sequence.  
+Narrative Structure: - Show premise connections based on sequencing rules.
+Rhetorical Relationships: - List all rhetorical relations [num, num, relation](e.g. [0, 1, Comment]).
+Exclusions: - Do not include resolution, calculations, or final answers.
+
+** According to the Segmented Discourse Rhetorical Theory, the rhetorical structure of a dialogue can be represented by a directed acyclic graph, where nodes are utterances and edges are the following 16 relations:
+{
+'Comment':'',
+"Clarification_question":"",
+"Elaboration":"",
+"Acknowledgement":"",
+"Explanation":"",    
+"Conditional":"",    
+"Question-answer pairs":"",
+"Alternation":"",
+"Question-Elaboration":"",
+"Result":"",
+"Background":"",
+"Narration":"",
+"Correction":"",
+"Parallel":"",
+"Contrast":"",
+"Continuation":""
+}
